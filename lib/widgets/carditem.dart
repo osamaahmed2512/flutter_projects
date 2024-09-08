@@ -8,24 +8,32 @@ import 'package:volt/helper/show_snack_bar.dart';
 import 'package:volt/helper/snackbar_floating.dart';
 import 'package:volt/models/memberdetails.dart';
 
-class CardItems extends StatelessWidget {
+class CardItems extends StatefulWidget {
   const CardItems({
     required this.memberDetails,
     super.key,
   });
   final MemberDetails memberDetails;
-  
+
+  @override
+  State<CardItems> createState() => _CardItemsState();
+}
+
+class _CardItemsState extends State<CardItems> {
   Future<void> deleteMember(BuildContext context) async{
     try {
-  await FirebaseFirestore.instance.collection('trainers').doc(memberDetails.id).delete();
-  SnackBar_Floating(context, text: "Memeber Deleted Succesfully !", color: Colors.green);
+  await FirebaseFirestore.instance.collection('members').doc(widget.memberDetails.id).delete();
+  setState(() {
+    SnackBar_Floating(context, text: "Memeber Deleted Succesfully !", color: Colors.green);
+  });
+ 
 }  catch (e) {
   if (context.mounted) {
   Showsnackbar(context, 'Failed to delete trainer: $e');
 }
 }
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -53,26 +61,26 @@ class CardItems extends StatelessWidget {
                   Column(
                     children: [
                       Text(
-                        memberDetails.name,
+                        widget.memberDetails.name,
                         style: TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 20,
                             color: Colors.black),
                       ),
                       Text(
-                        memberDetails.phonenumber,
+                        widget.memberDetails.phonenumber,
                         style: TextStyle(
                             fontWeight: FontWeight.w500, fontSize: 17),
                       ),
                       Text(
-                        memberDetails.paydate,
+                        widget.memberDetails.paydate,
                         style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: palette.fourthcolor,
                             fontSize: 16),
                       ),
                       Text(
-                        memberDetails.fee,
+                        widget.memberDetails.fee,
                         style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: palette.fourthcolor,
@@ -92,7 +100,7 @@ class CardItems extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () async{
-                        final Uri url = Uri(scheme:"tel",path: memberDetails.phonenumber);  
+                        final Uri url = Uri(scheme:"tel",path: widget.memberDetails.phonenumber);  
                         while(! await launchUrl(url)){
                           Showsnackbar(context,'cannot launch this url');
                           break;
@@ -144,7 +152,7 @@ class CardItems extends StatelessWidget {
                       context: context,
                       dialogType: DialogType.question,
                       animType: AnimType.rightSlide,
-                      title: 'Hello ${memberDetails.name.split(" ")[0]}',
+                      title: 'Hello ${widget.memberDetails.name.split(" ")[0]}',
                       desc: 'Are you sure you want to delete',
                       btnCancelOnPress: () {},
                       btnOkOnPress: () {deleteMember(context);},

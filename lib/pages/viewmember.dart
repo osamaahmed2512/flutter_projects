@@ -88,7 +88,7 @@ class _VeiwMemberState extends State<VeiwMember> {
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Expanded(
@@ -103,6 +103,7 @@ class _VeiwMemberState extends State<VeiwMember> {
                     return Text("Loading");
                   }
                   memberdetailslist.clear();
+                  filtermemberdetailslist.clear();
                   for (int i = 0; i < snapshot.data!.docs.length; i++) {
                     memberdetailslist
                         .add(MemberDetails.fromjson(snapshot.data!.docs[i]));
