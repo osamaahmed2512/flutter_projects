@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'gym-app-62a8f.appspot.com',
     measurementId: 'G-ZR0BT760N2',
   );
+
 }

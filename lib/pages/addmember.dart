@@ -1,11 +1,17 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:volt/helper/snackbar_floating.dart';
+import 'package:volt/helper/utils.dart';
 import 'package:volt/widgets/custombutton.dart';
 import 'package:volt/widgets/customtextfield2.dart';
 import 'package:volt/widgets/customtitle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:volt/widgets/customupload_image%20.dart';
 
 class AddMemberPage extends StatefulWidget {
   AddMemberPage({super.key});
@@ -32,6 +38,8 @@ class _AddMemberPageState extends State<AddMemberPage> {
   final CollectionReference trainers =
       FirebaseFirestore.instance.collection('members');
 
+  Uint8List? _image;
+ String? _uploadedImageUrl;
   void initState() {
     super.initState();
     // Set the registration date to today's date in 'yyyy-MM-dd' format
@@ -53,7 +61,10 @@ class _AddMemberPageState extends State<AddMemberPage> {
   }
 
   Future<void> addTrainer() async {
-    // Call the user's CollectionReference to add a new user
+     if (_uploadedImageUrl == null) {
+      snackBarFloating(context, text: "Image not uploaded yet", color: Colors.red);
+      return;
+    }
     try {
       await trainers.add({
         'first_name': _firstnamecontroller.text, // John Doe
@@ -63,15 +74,61 @@ class _AddMemberPageState extends State<AddMemberPage> {
         'registerationdate': _registrerationcontroller.text,
         'fee': _feecontroller.text,
         'birthdatecontroller': _birthdatecontroller.text,
-        // 42
+        'imageurl': _uploadedImageUrl,
       });
       clearFieldsAndUnfocus();
-      SnackBar_Floating(context,
+      snackBarFloating(context,
           text: "Memeber Added Succesfully !", color: Colors.green);
     } catch (e) {
-      SnackBar_Floating(context,
+      snackBarFloating(context,
           text: "Failed to add member:${e.toString()}", color: Colors.red);
     }
+  }
+
+  void selectImage() async {
+    Uint8List? img = await pickImage(ImageSource.gallery);
+    if (img != null) {
+      setState(() {
+        _image = img;
+      });
+      await uploadImageAndSaveData();
+    } else {
+       setState(() {
+        _image = null;
+      });
+      snackBarFloating(context, text: "No image selected", color: Colors.red);
+    }
+  }
+
+   Future<void> uploadImageAndSaveData() async{
+    if (_image !=null) {
+      try {
+  String imageName =  "${DateTime.now().microsecondsSinceEpoch}.jpg";
+      
+  Reference ref = FirebaseStorage.instance.ref().child("member_images/$imageName");  
+  UploadTask uploadTask = ref.putData(_image!); // <-- Upload image to Firebase Storage
+  TaskSnapshot snapshot = await uploadTask;
+  String downloadUrl = await snapshot.ref.getDownloadURL(); // <-- Get image URL from Firebase Storage
+  
+     setState(() {
+          _uploadedImageUrl = downloadUrl; // Store the image URL
+        });
+    
+} catch (e) {
+        snackBarFloating(context, text: "Image upload failed: ${e.toString()}", color: Colors.red);
+      }
+    }  else {
+      snackBarFloating(context, text: "Please select an image", color: Colors.red);
+    }
+
+  }
+
+    void _deleteImage(){
+    setState(() {
+        ImageCache().clear();
+      _image =  null;
+      _uploadedImageUrl = null; 
+    });
   }
 
   @override
@@ -90,6 +147,11 @@ class _AddMemberPageState extends State<AddMemberPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ListView(
                 children: [
+                  UploadImage(
+                    image: _image,
+                    selectImage: selectImage,
+                    deleteImage: _deleteImage,
+                  ),
                   Text(
                     "First Name",
                     style: TextStyle(

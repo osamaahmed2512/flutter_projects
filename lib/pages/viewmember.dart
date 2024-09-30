@@ -103,7 +103,7 @@ class _VeiwMemberState extends State<VeiwMember> {
                     return Text("Loading");
                   }
                   memberdetailslist.clear();
-                  filtermemberdetailslist.clear();
+                 filtermemberdetailslist.clear();
                   for (int i = 0; i < snapshot.data!.docs.length; i++) {
                     memberdetailslist
                         .add(MemberDetails.fromjson(snapshot.data!.docs[i]));
@@ -118,6 +118,7 @@ class _VeiwMemberState extends State<VeiwMember> {
                     itemBuilder: (context, index) {
                       return CardItems(
                         memberDetails: filtermemberdetailslist[index],
+                        collection: "members",
                       );
                     },
                   );

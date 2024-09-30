@@ -1,4 +1,3 @@
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,27 +10,30 @@ import 'package:volt/models/memberdetails.dart';
 class CardItems extends StatefulWidget {
   const CardItems({
     required this.memberDetails,
-    super.key,
+
+    super.key, required this.collection,
   });
   final MemberDetails memberDetails;
-
+  final String collection; 
   @override
   State<CardItems> createState() => _CardItemsState();
 }
 
 class _CardItemsState extends State<CardItems> {
-  Future<void> deleteMember(BuildContext context) async{
+  Future<void> deleteMember(BuildContext context) async {
     try {
-  await FirebaseFirestore.instance.collection('members').doc(widget.memberDetails.id).delete();
-  setState(() {
-    SnackBar_Floating(context, text: "Memeber Deleted Succesfully !", color: Colors.green);
-  });
- 
-}  catch (e) {
-  if (context.mounted) {
-  Showsnackbar(context, 'Failed to delete trainer: $e');
-}
-}
+      await FirebaseFirestore.instance
+          .collection(widget.collection)
+          .doc(widget.memberDetails.id)
+          .delete();
+      setState(() {
+        snackBarFloating(context,
+            text: "Memeber Deleted Succesfully !", color: Colors.green);
+      });
+    } catch (e) {
+     snackBarFloating(context,
+            text: "Memeber failed to delete !", color: Colors.red);
+    }
   }
 
   @override
@@ -49,10 +51,12 @@ class _CardItemsState extends State<CardItems> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 20),
-                    child: Image.asset(
-                      "assets/images/google_PNG19635.png",
-                      height: 50,
-                      width: 50,
+                    child:CircleAvatar(
+                      radius: 40,
+                      backgroundImage: widget.memberDetails.image != null && widget.memberDetails.image!.isNotEmpty
+                          ? NetworkImage(widget.memberDetails.image!)
+                          : AssetImage("assets/images/google_PNG19635.png") as ImageProvider,
+                      backgroundColor: Colors.transparent,
                     ),
                   ),
                   SizedBox(
@@ -99,13 +103,14 @@ class _CardItemsState extends State<CardItems> {
                   Column(
                     children: [
                       GestureDetector(
-                        onTap: () async{
-                        final Uri url = Uri(scheme:"tel",path: widget.memberDetails.phonenumber);  
-                        while(! await launchUrl(url)){
-                          Showsnackbar(context,'cannot launch this url');
-                          break;
-                        }
-                        
+                        onTap: () async {
+                          final Uri url = Uri(
+                              scheme: "tel",
+                              path: widget.memberDetails.phonenumber);
+                          while (!await launchUrl(url)) {
+                            Showsnackbar(context, 'cannot launch this url');
+                            break;
+                          }
                         },
                         child: Icon(
                           Icons.call,
@@ -149,15 +154,17 @@ class _CardItemsState extends State<CardItems> {
                   GestureDetector(
                     onTap: () {
                       AwesomeDialog(
-                      context: context,
-                      dialogType: DialogType.question,
-                      animType: AnimType.rightSlide,
-                      title: 'Hello ${widget.memberDetails.name.split(" ")[0]}',
-                      desc: 'Are you sure you want to delete',
-                      btnCancelOnPress: () {},
-                      btnOkOnPress: () {deleteMember(context);},
+                        context: context,
+                        dialogType: DialogType.question,
+                        animType: AnimType.rightSlide,
+                        title:
+                            'Hello ${widget.memberDetails.name.split(" ")[0]}',
+                        desc: 'Are you sure you want to delete',
+                        btnCancelOnPress: () {},
+                        btnOkOnPress: () {
+                          deleteMember(context);
+                        },
                       )..show();
-                      
                     },
                     child: Column(
                       children: [

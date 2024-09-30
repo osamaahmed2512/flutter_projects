@@ -5,10 +5,11 @@ import 'package:volt/models/memberdetails.dart';
 import 'package:volt/pages/addtrainer.dart';
 import 'package:volt/widgets/carditem.dart';
 
-class VeiwTrainer extends StatefulWidget {
-  VeiwTrainer({super.key});
-  static String id = "VeiwTrainer";
 
+class VeiwTrainer extends StatefulWidget {
+ const VeiwTrainer({super.key}   );
+  static String id = "VeiwTrainer";
+   
   @override
   State<VeiwTrainer> createState() => _VeiwTrainerState();
 }
@@ -22,15 +23,17 @@ class _VeiwTrainerState extends State<VeiwTrainer> {
   List<MemberDetails> Trainerdetailslist = [];
 
   List<MemberDetails> FilterTrainerdetailslist = [];
-
+  
   void _filtermembers() {
     String Query = _searchcontroller.text.toLowerCase();
+     FilterTrainerdetailslist.clear();
     setState(() {
       if (Query.isEmpty) {
-        FilterTrainerdetailslist = Trainerdetailslist;
+        
+        FilterTrainerdetailslist =List.from(Trainerdetailslist);
       } else {
-        FilterTrainerdetailslist = Trainerdetailslist.where(
-            (trainer) => trainer.name.toLowerCase().contains(Query)).toList();
+        FilterTrainerdetailslist = List.from(Trainerdetailslist.where(
+            (trainer) => trainer.name.toLowerCase().contains(Query)).toList()) ;
       }
     });
   }
@@ -55,7 +58,7 @@ class _VeiwTrainerState extends State<VeiwTrainer> {
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.only(top: 39),
                 hintStyle: TextStyle(color: Colors.black, fontSize: 17),
-                hintText: "Search for a Member",
+                hintText: "Search for a Trainer",
                 prefixIcon: Icon(Icons.search),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -109,6 +112,7 @@ class _VeiwTrainerState extends State<VeiwTrainer> {
                   //   Trainerdetailslist.add(MemberDetails.fromjson(snapshot.data!.docs[i]));
                   // }
                   Trainerdetailslist.clear();
+                
                   Trainerdetailslist = snapshot.data!.docs
                       .map((tainer) => MemberDetails.fromjson(tainer))
                       .toList();
@@ -122,6 +126,7 @@ class _VeiwTrainerState extends State<VeiwTrainer> {
                     itemBuilder: (context, index) {
                       return CardItems(
                         memberDetails: FilterTrainerdetailslist[index],
+                        collection: "trainers",
                       );
                     },
                   );
